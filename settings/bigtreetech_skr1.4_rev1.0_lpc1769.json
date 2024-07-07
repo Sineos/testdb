@@ -2,7 +2,7 @@
   "Board Information": {
     "Manufacturer": "BIGTREETECH",
     "Name": "SKR 1.4 Turbo",
-    "Revision": "1.1",
+    "Revision": "1.2",
     "Role": "USB",
     "Flashing Methods": {
       "Klipper": "make flash",
