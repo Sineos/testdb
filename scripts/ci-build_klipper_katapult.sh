@@ -26,3 +26,4 @@ make olddefconfig
 
 # Build with verbose output
 make V=1
+cd ..
