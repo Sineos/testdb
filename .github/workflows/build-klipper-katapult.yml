@@ -22,7 +22,7 @@ jobs:
     - name: Expose Env
       run: |
         # ACTIONS_RUNTIME_TOKEN, ACTIONS_RUNTIME_URL should be exposed
-        env|sort
+        env | sort
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -33,7 +33,7 @@ jobs:
       run: npm install @actions/artifact
 
     - name: Cache Klipper and Katapult directories
-      uses: actions/cache@v4
+      uses: actions/cache@v3
       with:
         path: |
           klipper
@@ -107,7 +107,7 @@ jobs:
           fi
 
           # Upload artifacts for Klipper
-          node scripts/ci-upload_artifacts.js "$JSON_FILE"
+          node scripts/ci-upload_artifacts.js "$JSON_FILE" klipper
         done
       shell: bash
       env:
@@ -130,7 +130,7 @@ jobs:
           fi
 
           # Upload artifacts for Katapult
-          node scripts/ci-upload_artifacts.js "$JSON_FILE"
+          node scripts/ci-upload_artifacts.js "$JSON_FILE" katapult
         done
       shell: bash
       env:
