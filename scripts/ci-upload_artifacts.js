@@ -33,10 +33,12 @@ fs.mkdirSync(outputDir);
 function processFiles(sourceDir, configDir, prefix, files) {
     files.forEach(file => {
         const sourcePath = path.join(sourceDir, file);
-        if (fs.existsSync(sourcePath)) {
+        if (fs.exists(sourcePath)) {
             const ext = path.extname(file);
             const baseName = path.basename(file, ext);
-            const newFileName = `${prefix}_${manufacturer}_${name}_${revision}_${role}${ext}`;
+            const newFileName = file === 'deployer.bin' 
+                ? `${prefix}_deployer_${manufacturer}_${name}_${revision}_${role}${ext}`
+                : `${prefix}_${manufacturer}_${name}_${revision}_${role}${ext}`;
             const destPath = path.join(outputDir, newFileName);
             fs.copyFileSync(sourcePath, destPath);
             console.log(`Copied ${sourcePath} to ${destPath}`);
