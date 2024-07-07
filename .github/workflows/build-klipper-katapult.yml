@@ -22,7 +22,6 @@ jobs:
 
     - name: Checkout Klipper repository
       run: |
-        cd /
         git clone https://github.com/Klipper3d/klipper.git klipper
         cd klipper
       shell: bash
@@ -38,7 +37,7 @@ jobs:
 
     - name: Checkout Katapult repository
       run: |
-        cd /
+        cd ..
         git clone https://github.com/Arksine/katapult.git katapult
       shell: bash
 
