@@ -1,4 +1,4 @@
-name: Build Klipper and Katapult
+name: CI Workflow for Klipper and Katapult with Custom Settings from JSON
 
 on:
   pull_request:
@@ -12,26 +12,15 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v2
       with:
-        fetch-depth: 0
-
-    - name: Fetch latest changes
-      run: |
-        git fetch --prune --unshallow
-      shell: bash
-      
-    - name: Setup cache
-      uses: actions/cache@v3
-      with:
-        path: ci_cache
-        key: ${{ runner.os }}-build-${{ hashFiles('.github/workflows/build-klipper-katapult.yml') }}
+        fetch-depth: 0  # Fetch all history for all branches and tags
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '22.x'
-  
+
     - name: Checkout Klipper repository
       run: |
         git clone https://github.com/Klipper3d/klipper.git klipper
@@ -44,12 +33,6 @@ jobs:
     - name: Checkout Katapult repository
       run: |
         git clone https://github.com/Arksine/katapult.git katapult
-      shell: bash
-
-    - name: Verify commits
-      run: |
-        git cat-file -e ${{ github.event.pull_request.base.sha }}
-        git cat-file -e ${{ github.event.pull_request.head.sha }}
       shell: bash
 
     - name: Get changed JSON files
@@ -67,7 +50,7 @@ jobs:
         echo "CHANGED_FILES=$CHANGED_FILES" >> $GITHUB_ENV
       shell: bash
 
-    - name: Process and build each changed JSON file for Klipper
+    - name: Process each changed JSON file for Klipper
       run: |
         for JSON_FILE in $CHANGED_FILES; do
           echo "Processing $JSON_FILE for Klipper"
@@ -87,7 +70,7 @@ jobs:
       env:
         CHANGED_FILES: ${{ env.CHANGED_FILES }}
 
-    - name: Process and build each changed JSON file for Katapult
+    - name: Process each changed JSON file for Katapult
       run: |
         for JSON_FILE in $CHANGED_FILES; do
           echo "Processing $JSON_FILE for Katapult"
