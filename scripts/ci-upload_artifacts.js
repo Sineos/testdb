@@ -67,9 +67,7 @@ processFiles(katapultOutDir, katapultConfigDir, 'katapult', ['katapult.bin', 'de
 
 // Upload artifacts
 (async () => {
-        const artifactClient = new DefaultArtifactClient({
-            token: githubToken // Pass the GitHub token here
-        });
+    const artifactClient = new DefaultArtifactClient();
     const artifactName = 'build-artifacts';
     const files = fs.readdirSync(outputDir).map(file => path.join(outputDir, file));
     const rootDirectory = outputDir;
