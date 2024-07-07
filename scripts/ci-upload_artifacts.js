@@ -9,6 +9,12 @@ if (!jsonFilePath) {
     process.exit(1);
 }
 
+const githubToken = process.env.GITHUB_TOKEN;
+if (!githubToken) {
+    console.error('GITHUB_TOKEN is not set.');
+    process.exit(1);
+}
+
 // Load the JSON configuration
 const config = JSON.parse(fs.readFileSync(jsonFilePath, 'utf8'));
 
@@ -61,7 +67,9 @@ processFiles(katapultOutDir, katapultConfigDir, 'katapult', ['katapult.bin', 'de
 
 // Upload artifacts
 (async () => {
-    const artifactClient = new DefaultArtifactClient();
+        const artifactClient = new DefaultArtifactClient({
+            token: githubToken // Pass the GitHub token here
+        });
     const artifactName = 'build-artifacts';
     const files = fs.readdirSync(outputDir).map(file => path.join(outputDir, file));
     const rootDirectory = outputDir;
