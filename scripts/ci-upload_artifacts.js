@@ -23,20 +23,22 @@ const klipperConfigDir = 'klipper';
 const katapultConfigDir = 'katapult';
 const outputDir = 'artifacts';
 
-// Ensure the output directory exists and is empty
-if (fs.existsSync(outputDir)) {
-    fs.rmSync(outputDir, { recursive: true });
+// Function to clean the output directory
+function cleanOutputDir() {
+    if (fs.existsSync(outputDir)) {
+        fs.rmSync(outputDir, { recursive: true, force: true });
+    }
+    fs.mkdirSync(outputDir);
 }
-fs.mkdirSync(outputDir);
 
 // Function to rename and move files
-function processFiles(sourceDir, configDir, prefix, files) {
+function processFiles(sourceDir, configDir, prefix, files, specialRename = {}) {
     files.forEach(file => {
         const sourcePath = path.join(sourceDir, file);
         if (fs.existsSync(sourcePath)) {
             const ext = path.extname(file);
             const baseName = path.basename(file, ext);
-            const newFileName = `${prefix}_${manufacturer}_${name}_${revision}_${role}${ext}`;
+            const newFileName = specialRename[file] ? `${prefix}_${specialRename[file]}_${manufacturer}_${name}_${revision}_${role}${ext}` : `${prefix}_${manufacturer}_${name}_${revision}_${role}${ext}`;
             const destPath = path.join(outputDir, newFileName);
             fs.copyFileSync(sourcePath, destPath);
             console.log(`Copied ${sourcePath} to ${destPath}`);
@@ -53,26 +55,43 @@ function processFiles(sourceDir, configDir, prefix, files) {
     }
 }
 
+// Clean the output directory before processing files
+cleanOutputDir();
+
 // Process Klipper files
 processFiles(klipperOutDir, klipperConfigDir, 'klipper', ['klipper.bin', 'klipper.dict']);
 
-// Process Katapult files
-processFiles(katapultOutDir, katapultConfigDir, 'katapult', ['katapult.bin', 'deployer.bin'].filter(file => fs.existsSync(path.join(katapultOutDir, file))));
-
-// Upload artifacts individually
+// Upload artifacts for Klipper
 (async () => {
     const artifactClient = new DefaultArtifactClient();
+    const artifactName = 'klipper-build-artifacts';
     const files = fs.readdirSync(outputDir).map(file => path.join(outputDir, file));
     const rootDirectory = outputDir;
 
     try {
-        for (const file of files) {
-            const fileName = path.basename(file);
-            const artifactName = fileName;
+        const { id, size } = await artifactClient.uploadArtifact(artifactName, files, rootDirectory);
+        console.log(`Artifact uploaded with ID: ${id} and size: ${size} bytes`);
+    } catch (error) {
+        console.error(`Artifact upload failed: ${error}`);
+    }
+})();
 
-            const { id, size } = await artifactClient.uploadArtifact(artifactName, [file], rootDirectory);
-            console.log(`Artifact uploaded with ID: ${id} and size: ${size} bytes`);
-        }
+// Clean the output directory before processing Katapult files
+cleanOutputDir();
+
+// Process Katapult files with special rename for deployer.bin
+processFiles(katapultOutDir, katapultConfigDir, 'katapult', ['katapult.bin', 'deployer.bin'], { 'deployer.bin': 'deployer' });
+
+// Upload artifacts for Katapult
+(async () => {
+    const artifactClient = new DefaultArtifactClient();
+    const artifactName = 'katapult-build-artifacts';
+    const files = fs.readdirSync(outputDir).map(file => path.join(outputDir, file));
+    const rootDirectory = outputDir;
+
+    try {
+        const { id, size } = await artifactClient.uploadArtifact(artifactName, files, rootDirectory);
+        console.log(`Artifact uploaded with ID: ${id} and size: ${size} bytes`);
     } catch (error) {
         console.error(`Artifact upload failed: ${error}`);
     }
