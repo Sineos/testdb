@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { uploadArtifact } = require('@actions/artifact');
+const { DefaultArtifactClient } = require('@actions/artifact');
 
 // Get the JSON file path from the command line argument
 const jsonFilePath = process.argv[2];
@@ -59,13 +59,16 @@ processFiles(klipperOutDir, klipperConfigDir, 'klipper', ['klipper.bin', 'klippe
 processFiles(katapultOutDir, katapultConfigDir, 'katapult', ['katapult.bin', 'deployer.bin'].filter(file => fs.existsSync(path.join(katapultOutDir, file))));
 
 // Upload artifacts
-const artifactClient = uploadArtifact.create();
-const artifactName = 'build-artifacts';
-const files = fs.readdirSync(outputDir).map(file => path.join(outputDir, file));
-const rootDirectory = outputDir;
+(async () => {
+    const artifactClient = new DefaultArtifactClient();
+    const artifactName = 'build-artifacts';
+    const files = fs.readdirSync(outputDir).map(file => path.join(outputDir, file));
+    const rootDirectory = outputDir;
 
-artifactClient.uploadArtifact(artifactName, files, rootDirectory).then(response => {
-    console.log(`Artifact upload response: ${JSON.stringify(response)}`);
-}).catch(error => {
-    console.error(`Artifact upload failed: ${error}`);
-});
+    try {
+        const { id, size } = await artifactClient.uploadArtifact(artifactName, files, rootDirectory);
+        console.log(`Artifact uploaded with ID: ${id} and size: ${size} bytes`);
+    } catch (error) {
+        console.error(`Artifact upload failed: ${error}`);
+    }
+})();
