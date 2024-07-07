@@ -9,12 +9,6 @@ if (!jsonFilePath) {
     process.exit(1);
 }
 
-const githubToken = process.env.GITHUB_TOKEN;
-if (!githubToken) {
-    console.error('GITHUB_TOKEN is not set.');
-    process.exit(1);
-}
-
 // Load the JSON configuration
 const config = JSON.parse(fs.readFileSync(jsonFilePath, 'utf8'));
 
