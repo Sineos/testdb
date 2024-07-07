@@ -16,9 +16,13 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Export env
-      uses: peaceiris/actions-export-envs@v1.1.0
-      id: envs
+    - name: Expose GitHub Runtime
+      uses: crazy-max/ghaction-github-runtime@v3
+
+    - name: Env
+      run: |
+        # ACTIONS_RUNTIME_TOKEN, ACTIONS_RUNTIME_URL should be exposed
+        env|sort
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -48,20 +52,20 @@ jobs:
         # Get the base and head commits of the pull request
         BASE_SHA=${{ github.event.pull_request.base.sha }}
         HEAD_SHA=${{ github.event.pull_request.head.sha }}
-        
+
         echo "BASE_SHA: $BASE_SHA"
         echo "HEAD_SHA: $HEAD_SHA"
-        
+
         # Get the list of changed files in the pull request
         CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB $BASE_SHA...$HEAD_SHA)
         echo "Changed files in the PR:"
         echo "$CHANGED_FILES"
-        
+
         # Filter for JSON files in the settings folder
         SETTINGS_JSON_FILES=$(echo "$CHANGED_FILES" | grep 'settings/.*\.json' || true)
         echo "JSON files in settings folder:"
         echo "$SETTINGS_JSON_FILES"
-        
+
         # Set the environment variable
         echo "CHANGED_FILES=$SETTINGS_JSON_FILES" >> $GITHUB_ENV
       shell: bash
@@ -88,8 +92,6 @@ jobs:
       shell: bash
       env:
         CHANGED_FILES: ${{ env.CHANGED_FILES }}
-        ACTIONS_RUNTIME_TOKEN: ${{ steps.envs.outputs.ACTIONS_RUNTIME_TOKEN }}
-        ACTIONS_CACHE_URL: ${{ steps.envs.outputs.ACTIONS_CACHE_URL }}
 
     - name: Process each changed JSON file for Katapult
       run: |
@@ -113,5 +115,4 @@ jobs:
       shell: bash
       env:
         CHANGED_FILES: ${{ env.CHANGED_FILES }}
-        ACTIONS_RUNTIME_TOKEN: ${{ steps.envs.outputs.ACTIONS_RUNTIME_TOKEN }}
-        ACTIONS_CACHE_URL: ${{ steps.envs.outputs.ACTIONS_CACHE_URL }}
+
