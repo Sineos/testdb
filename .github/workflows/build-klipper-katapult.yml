@@ -29,45 +29,41 @@ jobs:
       with:
         node-version: '22.x'
 
-    - name: Cache Node.js dependencies
-      uses: actions/cache@v3
-      with:
-        path: node_modules
-        key: ${{ runner.os }}-build-${{ hashFiles('.github/workflows/build-klipper-katapult.yml') }}-node-modules
-        restore-keys: |
-          ${{ runner.os }}-build-${{ hashFiles('.github/workflows/build-klipper-katapult.yml') }}-node-modules
-
     - name: Install dependencies
       run: npm install @actions/artifact
 
-    - name: Cache Klipper repository
-      uses: actions/cache@v3
+    - name: Cache Klipper and Katapult directories
+      uses: actions/cache@v4
       with:
-        path: klipper
-        key: ${{ runner.os }}-build-${{ hashFiles('.github/workflows/build-klipper-katapult.yml') }}-klipper
-        restore-keys: |
-          ${{ runner.os }}-build-${{ hashFiles('.github/workflows/build-klipper-katapult.yml') }}-klipper
+        path: |
+          klipper
+          katapult
+        key: ${{ runner.os }}-build-${{ hashFiles('.github/workflows/build-klipper-katapult.yml') }}
 
-    - name: Checkout Klipper repository
+    - name: Update Klipper repository
       run: |
-        git clone https://github.com/Klipper3d/klipper.git klipper
+        if [ -d "klipper" ]; then
+          cd klipper
+          git pull
+          cd ..
+        else
+          git clone https://github.com/Klipper3d/klipper.git klipper
+        fi
       shell: bash
 
     - name: Prepare tests
       run: ./scripts/ci-install.sh
       shell: bash
 
-    - name: Cache Katapult repository
-      uses: actions/cache@v3
-      with:
-        path: katapult
-        key: ${{ runner.os }}-build-${{ hashFiles('.github/workflows/build-klipper-katapult.yml') }}-katapult
-        restore-keys: |
-          ${{ runner.os }}-build-${{ hashFiles('.github/workflows/build-klipper-katapult.yml') }}-katapult
-
-    - name: Checkout Katapult repository
+    - name: Update Katapult repository
       run: |
-        git clone https://github.com/Arksine/katapult.git katapult
+        if [ -d "katapult" ]; then
+          cd katapult
+          git pull
+          cd ..
+        else
+          git clone https://github.com/Arksine/katapult.git katapult
+        fi
       shell: bash
 
     - name: Get changed JSON files
