@@ -1,5 +1,8 @@
 name: Build Klipper and Katapult according to JSON file(s)
 
+permissions:
+  id-token: write
+
 on:
   pull_request:
     types: [opened, synchronize]
