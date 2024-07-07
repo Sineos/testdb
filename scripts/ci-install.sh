@@ -40,11 +40,11 @@ if [ ! -f ${PRU_FILE} ]; then
     export PREFIX=${PRU_DIR}
     ./download-and-prepare.sh 2>&1 | pv -nli 30 > ${BUILD_DIR}/gnupru-build.log
     # ./build.sh 2>&1 | pv -nli 30 >> ${BUILD_DIR}/gnupru-build.log
-    cd ${BUILD_DIR}
-    tar cfz ${PRU_FILE} pru-gcc/
-else
-    cd ${BUILD_DIR}
-    tar xfz ${PRU_FILE}
+    # cd ${BUILD_DIR}
+    # tar cfz ${PRU_FILE} pru-gcc/
+# else
+#    cd ${BUILD_DIR}
+#    tar xfz ${PRU_FILE}
 fi
 
 ######################################################################
