@@ -16,6 +16,10 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Export env
+      uses: peaceiris/actions-export-envs@v1.1.0
+      id: envs
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -84,7 +88,8 @@ jobs:
       shell: bash
       env:
         CHANGED_FILES: ${{ env.CHANGED_FILES }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        ACTIONS_RUNTIME_TOKEN: ${{ steps.envs.outputs.ACTIONS_RUNTIME_TOKEN }}
+        ACTIONS_CACHE_URL: ${{ steps.envs.outputs.ACTIONS_CACHE_URL }}
 
     - name: Process each changed JSON file for Katapult
       run: |
@@ -108,4 +113,5 @@ jobs:
       shell: bash
       env:
         CHANGED_FILES: ${{ env.CHANGED_FILES }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        ACTIONS_RUNTIME_TOKEN: ${{ steps.envs.outputs.ACTIONS_RUNTIME_TOKEN }}
+        ACTIONS_CACHE_URL: ${{ steps.envs.outputs.ACTIONS_CACHE_URL }}
