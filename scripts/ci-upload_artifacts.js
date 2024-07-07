@@ -33,7 +33,7 @@ fs.mkdirSync(outputDir);
 function processFiles(sourceDir, configDir, prefix, files) {
     files.forEach(file => {
         const sourcePath = path.join(sourceDir, file);
-        if (fs.exists(sourcePath)) {
+        if (fs.existsSync(sourcePath)) {
             const ext = path.extname(file);
             const baseName = path.basename(file, ext);
             const newFileName = file === 'deployer.bin' 
