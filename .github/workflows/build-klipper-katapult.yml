@@ -46,8 +46,17 @@ jobs:
         echo "HEAD_SHA: $HEAD_SHA"
         
         # Get the list of changed files in the pull request
-        CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB $BASE_SHA...$HEAD_SHA | grep 'settings/*.json')
-        echo "CHANGED_FILES=$CHANGED_FILES" >> $GITHUB_ENV
+        CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB $BASE_SHA...$HEAD_SHA)
+        echo "Changed files in the PR:"
+        echo "$CHANGED_FILES"
+        
+        # Filter for JSON files in the settings folder
+        SETTINGS_JSON_FILES=$(echo "$CHANGED_FILES" | grep 'settings/.*\.json' || true)
+        echo "JSON files in settings folder:"
+        echo "$SETTINGS_JSON_FILES"
+        
+        # Set the environment variable
+        echo "CHANGED_FILES=$SETTINGS_JSON_FILES" >> $GITHUB_ENV
       shell: bash
 
     - name: Process each changed JSON file for Klipper
