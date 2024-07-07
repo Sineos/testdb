@@ -18,7 +18,14 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ci_cache
-        key: ${{ runner.os }}-build-${{ hashFiles('scripts/ci-install.sh') }}
+        key: ${{ runner.os }}-build-${{ hashFiles('.github/workflows/build-klipper-katapult.yml') }}
+
+    - name: Checkout Klipper repository
+      run: |
+        cd /
+        git clone https://github.com/Klipper3d/klipper.git klipper
+        cd klipper
+      shell: bash
 
     - name: Prepare tests
       run: ./scripts/ci-install.sh
@@ -29,13 +36,9 @@ jobs:
       with:
         node-version: '22.x'
 
-    - name: Checkout Klipper repository
-      run: |
-        git clone https://github.com/Klipper3d/klipper.git klipper
-      shell: bash
-
     - name: Checkout Katapult repository
       run: |
+        cd /
         git clone https://github.com/Arksine/katapult.git katapult
       shell: bash
 
