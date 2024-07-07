@@ -25,7 +25,7 @@ const outputDir = 'artifacts';
 
 // Ensure the output directory exists and is empty
 if (fs.existsSync(outputDir)) {
-    fs.rmdirSync(outputDir, { recursive: true });
+    fs.rmSync(outputDir, { recursive: true });
 }
 fs.mkdirSync(outputDir);
 
@@ -59,16 +59,20 @@ processFiles(klipperOutDir, klipperConfigDir, 'klipper', ['klipper.bin', 'klippe
 // Process Katapult files
 processFiles(katapultOutDir, katapultConfigDir, 'katapult', ['katapult.bin', 'deployer.bin'].filter(file => fs.existsSync(path.join(katapultOutDir, file))));
 
-// Upload artifacts
+// Upload artifacts individually
 (async () => {
     const artifactClient = new DefaultArtifactClient();
-    const artifactName = 'build-artifacts';
     const files = fs.readdirSync(outputDir).map(file => path.join(outputDir, file));
     const rootDirectory = outputDir;
 
     try {
-        const { id, size } = await artifactClient.uploadArtifact(artifactName, files, rootDirectory);
-        console.log(`Artifact uploaded with ID: ${id} and size: ${size} bytes`);
+        for (const file of files) {
+            const fileName = path.basename(file);
+            const artifactName = fileName;
+
+            const { id, size } = await artifactClient.uploadArtifact(artifactName, [file], rootDirectory);
+            console.log(`Artifact uploaded with ID: ${id} and size: ${size} bytes`);
+        }
     } catch (error) {
         console.error(`Artifact upload failed: ${error}`);
     }
