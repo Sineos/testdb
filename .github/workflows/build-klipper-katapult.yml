@@ -42,8 +42,12 @@ jobs:
     - name: Get changed JSON files
       id: get_json_files
       run: |
+        # Get the base and head commits of the pull request
+        BASE_SHA=${{ github.event.pull_request.base.sha }}
+        HEAD_SHA=${{ github.event.pull_request.head.sha }}
+        
         # Get the list of changed files in the pull request
-        CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB ${{ github.event.pull_request.base.sha }}...${{ github.sha }} | grep 'settings/*.json')
+        CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB $BASE_SHA...$HEAD_SHA | grep 'settings/*.json')
         echo "CHANGED_FILES=$CHANGED_FILES" >> $GITHUB_ENV
       shell: bash
 
