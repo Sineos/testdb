@@ -12,7 +12,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
@@ -20,6 +20,9 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '22.x'
+
+    - name: Install dependencies
+      run: npm install @actions/artifact
 
     - name: Checkout Klipper repository
       run: |
@@ -74,6 +77,9 @@ jobs:
             echo "Build failed for $JSON_FILE in Klipper!"
             exit 1
           fi
+
+          # Upload artifacts for Klipper
+          node scripts/ci-upload_artifacts.js "$JSON_FILE"
         done
       shell: bash
       env:
@@ -94,14 +100,8 @@ jobs:
             echo "Build failed for $JSON_FILE in Katapult!"
             exit 1
           fi
-        done
-      shell: bash
-      env:
-        CHANGED_FILES: ${{ env.CHANGED_FILES }}
 
-    - name: Upload Artifacts
-      run: |
-        for JSON_FILE in $CHANGED_FILES; do
+          # Upload artifacts for Katapult
           node scripts/ci-upload_artifacts.js "$JSON_FILE"
         done
       shell: bash
