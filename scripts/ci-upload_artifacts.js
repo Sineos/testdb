@@ -13,7 +13,7 @@ if (!jsonFilePath) {
 const config = JSON.parse(fs.readFileSync(jsonFilePath, 'utf8'));
 
 const manufacturer = config['Board Information']['Manufacturer'];
-const name = config['Board Information']['Name'];
+const name = config['Board Information']['Name'].replace(/\s+/g, '-'); // Replace spaces with dashes
 const revision = config['Board Information']['Revision'];
 const role = config['Board Information']['Role'];
 
@@ -23,10 +23,11 @@ const klipperConfigDir = 'klipper';
 const katapultConfigDir = 'katapult';
 const outputDir = 'artifacts';
 
-// Ensure the output directory exists
-if (!fs.existsSync(outputDir)){
-    fs.mkdirSync(outputDir);
+// Ensure the output directory exists and is empty
+if (fs.existsSync(outputDir)) {
+    fs.rmdirSync(outputDir, { recursive: true });
 }
+fs.mkdirSync(outputDir);
 
 // Function to rename and move files
 function processFiles(sourceDir, configDir, prefix, files) {
