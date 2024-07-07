@@ -2,10 +2,10 @@ const fs = require('fs');
 const path = require('path');
 const { DefaultArtifactClient } = require('@actions/artifact');
 
-// Get the JSON file path from the command line argument
-const jsonFilePath = process.argv[2];
-if (!jsonFilePath) {
-    console.error('No JSON file path provided.');
+// Get the JSON file path and build type (klipper/katapult) from the command line arguments
+const [jsonFilePath, buildType] = process.argv.slice(2);
+if (!jsonFilePath || !buildType) {
+    console.error('No JSON file path or build type provided.');
     process.exit(1);
 }
 
@@ -23,22 +23,20 @@ const klipperConfigDir = 'klipper';
 const katapultConfigDir = 'katapult';
 const outputDir = 'artifacts';
 
-// Function to clean the output directory
-function cleanOutputDir() {
-    if (fs.existsSync(outputDir)) {
-        fs.rmSync(outputDir, { recursive: true, force: true });
-    }
-    fs.mkdirSync(outputDir);
+// Ensure the output directory exists and is empty
+if (fs.existsSync(outputDir)) {
+    fs.rmSync(outputDir, { recursive: true, force: true });
 }
+fs.mkdirSync(outputDir);
 
 // Function to rename and move files
-function processFiles(sourceDir, configDir, prefix, files, specialRename = {}) {
+function processFiles(sourceDir, configDir, prefix, files) {
     files.forEach(file => {
         const sourcePath = path.join(sourceDir, file);
         if (fs.existsSync(sourcePath)) {
             const ext = path.extname(file);
             const baseName = path.basename(file, ext);
-            const newFileName = specialRename[file] ? `${prefix}_${specialRename[file]}_${manufacturer}_${name}_${revision}_${role}${ext}` : `${prefix}_${manufacturer}_${name}_${revision}_${role}${ext}`;
+            const newFileName = `${prefix}_${manufacturer}_${name}_${revision}_${role}${ext}`;
             const destPath = path.join(outputDir, newFileName);
             fs.copyFileSync(sourcePath, destPath);
             console.log(`Copied ${sourcePath} to ${destPath}`);
@@ -55,44 +53,27 @@ function processFiles(sourceDir, configDir, prefix, files, specialRename = {}) {
     }
 }
 
-// Clean the output directory before processing files
-cleanOutputDir();
+// Process files based on the build type
+if (buildType === 'klipper') {
+    processFiles(klipperOutDir, klipperConfigDir, 'klipper', ['klipper.bin', 'klipper.dict']);
+} else if (buildType === 'katapult') {
+    processFiles(katapultOutDir, katapultConfigDir, 'katapult', ['katapult.bin', 'deployer.bin'].filter(file => fs.existsSync(path.join(katapultOutDir, file))));
+}
 
-// Process Klipper files
-processFiles(klipperOutDir, klipperConfigDir, 'klipper', ['klipper.bin', 'klipper.dict']);
-
-// Upload artifacts for Klipper
+// Upload artifacts
 (async () => {
     const artifactClient = new DefaultArtifactClient();
-    const artifactName = 'klipper-build-artifacts';
     const files = fs.readdirSync(outputDir).map(file => path.join(outputDir, file));
-    const rootDirectory = outputDir;
 
-    try {
-        const { id, size } = await artifactClient.uploadArtifact(artifactName, files, rootDirectory);
-        console.log(`Artifact uploaded with ID: ${id} and size: ${size} bytes`);
-    } catch (error) {
-        console.error(`Artifact upload failed: ${error}`);
-    }
-})();
+    for (const file of files) {
+        try {
+            const artifactName = path.basename(file);
+            const rootDirectory = outputDir;
 
-// Clean the output directory before processing Katapult files
-cleanOutputDir();
-
-// Process Katapult files with special rename for deployer.bin
-processFiles(katapultOutDir, katapultConfigDir, 'katapult', ['katapult.bin', 'deployer.bin'], { 'deployer.bin': 'deployer' });
-
-// Upload artifacts for Katapult
-(async () => {
-    const artifactClient = new DefaultArtifactClient();
-    const artifactName = 'katapult-build-artifacts';
-    const files = fs.readdirSync(outputDir).map(file => path.join(outputDir, file));
-    const rootDirectory = outputDir;
-
-    try {
-        const { id, size } = await artifactClient.uploadArtifact(artifactName, files, rootDirectory);
-        console.log(`Artifact uploaded with ID: ${id} and size: ${size} bytes`);
-    } catch (error) {
-        console.error(`Artifact upload failed: ${error}`);
+            const { id, size } = await artifactClient.uploadArtifact(artifactName, [file], rootDirectory);
+            console.log(`Artifact uploaded with ID: ${id} and size: ${size} bytes`);
+        } catch (error) {
+            console.error(`Artifact upload failed: ${error}`);
+        }
     }
 })();
