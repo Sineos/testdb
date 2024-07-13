@@ -12,7 +12,7 @@ if (!jsonFilePath || !targetDirectory) {
 
 // Read and parse the JSON file
 const data = JSON.parse(fs.readFileSync(jsonFilePath, 'utf8'));
-let settingsArray, configFilePath;
+let settingsArray; let configFilePath;
 
 if (targetDirectory.toLowerCase() === 'klipper') {
   settingsArray = data['Klipper Settings'];
@@ -25,10 +25,11 @@ if (targetDirectory.toLowerCase() === 'klipper') {
   process.exit(1);
 }
 
-let content = [];
+const content = [];
 
 // Check if LOW_LEVEL_OPTIONS is already present, if not, add the default setting
 const lowLevelOptionExists = settingsArray.some((setting) => setting.trim().startsWith('LOW_LEVEL_OPTIONS'));
+
 if (!lowLevelOptionExists) {
   content.push('CONFIG_LOW_LEVEL_OPTIONS=y'); // Add default setting if it doesn't exist
 }
@@ -36,6 +37,7 @@ if (!lowLevelOptionExists) {
 // Process each setting in the array
 settingsArray.forEach((setting) => {
   let [key, value] = setting.split('=');
+
   key = 'CONFIG_' + key.trim();
   if (value === undefined) {
     value = 'y';

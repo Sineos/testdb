@@ -5,7 +5,7 @@
 # Stop script early on any error; check variables; be verbose
 set -eux
 
-MAIN_DIR=${PWD}/klipper
+MAIN_DIR=${PWD}
 BUILD_DIR=${PWD}/ci_build
 CACHE_DIR=${PWD}/ci_cache
 mkdir -p ${BUILD_DIR} ${CACHE_DIR}
@@ -39,12 +39,12 @@ if [ ! -f ${PRU_FILE} ]; then
     cd gnupru
     export PREFIX=${PRU_DIR}
     ./download-and-prepare.sh 2>&1 | pv -nli 30 > ${BUILD_DIR}/gnupru-build.log
-    # ./build.sh 2>&1 | pv -nli 30 >> ${BUILD_DIR}/gnupru-build.log
-    # cd ${BUILD_DIR}
-    # tar cfz ${PRU_FILE} pru-gcc/
-# else
-#    cd ${BUILD_DIR}
-#    tar xfz ${PRU_FILE}
+    ./build.sh 2>&1 | pv -nli 30 >> ${BUILD_DIR}/gnupru-build.log
+    cd ${BUILD_DIR}
+    tar cfz ${PRU_FILE} pru-gcc/
+else
+    cd ${BUILD_DIR}
+    tar xfz ${PRU_FILE}
 fi
 
 ######################################################################
