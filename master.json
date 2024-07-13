@@ -114,7 +114,7 @@
         "Board Information": {
             "Manufacturer": "Mellow",
             "Name": "SHT42",
-            "Revision": "1.0",
+            "Revision": "1.1",
             "Role": "CAN",
             "Flashing Methods Initial": {
                 "Klipper": [
